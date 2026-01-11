@@ -57,7 +57,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative w-[90%] mx-auto py-24">
+    <section id="contact" className="relative w-[90%] mx-auto py-12">
       {/* Section Header */}
       <div className="text-center mb-16">
         <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4">

@@ -1,72 +1,213 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+
 interface Work {
   id: number;
   title: string;
   client: string;
+  product?: string;
   testimonial: string;
   rating: number;
-  image: string;
+  videoUrl?: string;
 }
-
 const works: Work[] = [
   {
     id: 1,
-    title: "E-commerce Product Campaign",
-    client: "TechFlow Store",
+    title: "Artisan Pizza Brand Campaign",
+    client: "Artisan Pizza",
+    product: "Signature Wood-Fired Margherita",
     testimonial:
-      "The CGI ads we received exceeded our expectations. The quality was professional and the turnaround time was incredibly fast.",
+      "The visuals captured our oven-first craft — sales spiked and customers kept coming back.",
     rating: 5,
-    image: "🎬",
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767691722/_shot__202601012104_jrl2u_lty3xo.mp4",
   },
   {
     id: 2,
-    title: "Luxury Brand Launch",
-    client: "Elegance Collective",
+    title: "CocoaDream Bliss Launch",
+    client: "CocoaDream Bliss",
+    product: "Single-Origin Dark Chocolate Bar",
     testimonial:
-      "PixelDrift understood our vision perfectly. The animations brought our premium products to life in ways we never imagined.",
+      "The product film communicated the bean-to-bar story beautifully — our tasting events sold out.",
     rating: 5,
-    image: "✨",
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767691706/CocoaDream-Ad-761120de_qejhsy.mp4",
   },
   {
     id: 3,
-    title: "Mobile App Promotion",
-    client: "FitPro Technologies",
+    title: "Rising Diamond Launch Film",
+    client: "Rising Diamond",
+    product: "Rising Cut Solitaire Ring",
     testimonial:
-      "The viral reels generated massive engagement. Our app downloads increased by 300% within weeks of launching these ads.",
-    rating: 4,
-    image: "📱",
+      "The campaign spotlighted our craftsmanship; bookings for private viewings doubled.",
+    rating: 5,
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767691550/bf6a6475a11651b407a612026380a396_lmbl3p.mp4",
   },
   {
     id: 4,
-    title: "Startup Explainer Video",
-    client: "CloudSync Inc",
+    title: "adidas — Reviel Collection",
+    client: "adidas",
+    product: "Reviel Performance Sneaker",
     testimonial:
-      "Complex software features were simplified beautifully. Our conversion rate jumped significantly thanks to this explainer video.",
-    rating: 5,
-    image: "🚀",
+      "The motion and lifestyle cuts showcased performance and style — great reception across socials.",
+    rating: 4,
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767258809/ssstwitter.com_1767258766002_mrzlud.mp4",
   },
   {
     id: 5,
-    title: "Fashion Brand Reels",
-    client: "StyleVibe Co",
+    title: "BrewMaster Machine Launch",
+    client: "BrewMaster",
+    product: "Barista One-Touch Espresso Machine",
     testimonial:
-      "The creative team nailed our brand aesthetic. These reels became our highest-performing content across all platforms.",
+      "A polished product demo that made complex features feel effortless — pre-orders exceeded targets.",
     rating: 5,
-    image: "👗",
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767257675/ssstwitter.com_1767257587494_mtibib.mp4",
   },
   {
     id: 6,
-    title: "Product Demo Animation",
-    client: "SmartHome Solutions",
+    title: "Tesla Showroom Experience",
+    client: "Tesla",
+    product: "Model Showcase & Test Drive",
     testimonial:
-      "Professional quality at reasonable prices. The team was responsive and made revisions quickly. Highly recommend!",
-    rating: 4,
-    image: "🏠",
+      "The showroom walkthrough videos brought the cars to life and drove test drive bookings.",
+    rating: 5,
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767257974/ssstwitter.com_1767257946650_wr9use.mp4",
+  },
+  {
+    id: 7,
+    title: "Haven & Hue — Living Collection",
+    client: "Haven & Hue",
+    product: "Curated Home Decor Collection",
+    testimonial:
+      "The lookbook reels inspired customers to re-style rooms; conversions rose across the site.",
+    rating: 5,
+    videoUrl:
+      "https://res.cloudinary.com/djpy1yni7/video/upload/v1767256666/ssstwitter.com_1767256567372_xk3qpq.mp4",
   },
 ];
 
 export default function PreviousWorks() {
+  const [playingId, setPlayingId] = useState<number | null>(null);
+
+  function getEmbedUrl(url?: string) {
+    if (!url) return "";
+    try {
+      // YouTube watch -> embed
+      if (url.includes("watch?v=")) return url.replace("watch?v=", "embed/");
+      if (url.includes("youtu.be/"))
+        return url.replace("youtu.be/", "www.youtube.com/embed/");
+      return url;
+    } catch (e) {
+      return url;
+    }
+  }
+
+  function VideoArea({ work }: { work: Work }) {
+    const isPlaying = playingId === work.id;
+    const embed = getEmbedUrl(work.videoUrl);
+    const ytId = (work.videoUrl || "").match(
+      /(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/
+    )?.[1];
+
+    const isMp4 = (url?: string) => !!url && /\.mp4(\?.*)?$/i.test(url);
+
+    // Playing state: render full player with controls
+    if (isPlaying && embed) {
+      if (ytId) {
+        const src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&controls=1`;
+        return (
+          <div className="w-full aspect-video bg-black/80">
+            <iframe
+              src={src}
+              title={work.title}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen={true}
+            />
+          </div>
+        );
+      }
+
+      // direct video
+      return (
+        <div className="w-full aspect-video bg-black/80">
+          <video
+            src={work.videoUrl}
+            controls
+            autoPlay
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+
+    // Preview state: show muted looping preview where possible
+    if (isMp4(work.videoUrl)) {
+      return (
+        <div className="relative w-full aspect-video flex items-center justify-center overflow-hidden">
+          <video
+            src={work.videoUrl}
+            muted
+            loop
+            playsInline
+            autoPlay
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/20" />
+          <button
+            onClick={() => setPlayingId(work.id)}
+            className="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-white/0 hover:border-white/80 bg-white/5"
+            aria-label={`Play video for ${work.title}`}
+          >
+            <span className="text-2xl text-white">▶</span>
+          </button>
+        </div>
+      );
+    }
+
+    // For YouTube links try an autoplay muted embed preview (may be blocked in some browsers)
+    if (ytId) {
+      const preview = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=${ytId}`;
+      return (
+        <div className="relative w-full aspect-video flex items-center justify-center overflow-hidden">
+          <iframe
+            src={preview}
+            title={`preview-${work.title}`}
+            className="absolute inset-0 w-full h-full"
+            allow="autoplay; encrypted-media"
+          />
+          <div className="absolute inset-0 bg-black/20" />
+          <button
+            onClick={() => setPlayingId(work.id)}
+            className="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-white/0 hover:border-white/80 bg-white/5"
+            aria-label={`Play video for ${work.title}`}
+          >
+            <span className="text-2xl text-white">▶</span>
+          </button>
+        </div>
+      );
+    }
+
+    // Fallback: show neutral placeholder
+    return (
+      <div className="relative w-full aspect-video bg-linear-to-br from-purple-900/30 to-blue-900/30 flex items-center justify-center overflow-hidden group-hover:from-purple-900/50 group-hover:to-blue-900/50 transition-all duration-300">
+        <button
+          onClick={() => setPlayingId(work.id)}
+          className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-white/0 hover:border-white/80 bg-white/5"
+          aria-label={`Play video for ${work.title}`}
+        >
+          <span className="text-2xl text-white">▶</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <section
       id="works"
@@ -92,36 +233,29 @@ export default function PreviousWorks() {
 
       {/* Works Grid */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {works.map((work) => (
+        {works.slice(0, 6).map((work) => (
           <div key={work.id} className="group relative">
             {/* Card Content */}
             <div className="relative rounded-2xl border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 h-full flex flex-col overflow-hidden">
               {/* Video Placeholder */}
-              <div className="relative w-full aspect-video bg-gradient-to-br from-purple-900/30 to-blue-900/30 flex items-center justify-center overflow-hidden group-hover:from-purple-900/50 group-hover:to-blue-900/50 transition-all duration-300">
-                <div className="text-6xl">{work.image}</div>
-
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-300">
-                  <div className="w-16 h-16 rounded-full border-2 border-white/0 group-hover:border-white/80 flex items-center justify-center group-hover:bg-white/10 transition-all duration-300">
-                    <span className="text-2xl text-white/0 group-hover:text-white transition-all duration-300">
-                      ▶
-                    </span>
-                  </div>
-                </div>
-              </div>
+              {/* Video area: when playing show embedded iframe, otherwise show clickable placeholder */}
+              <VideoArea work={work} />
 
               {/* Content Section */}
-              <div className="p-6 flex flex-col flex-grow">
+              <div className="p-6 flex flex-col grow">
                 {/* Title and Client */}
                 <h3 className="text-xl font-bold text-white mb-1">
                   {work.title}
                 </h3>
-                <p className="text-sm text-purple-400 font-semibold mb-4">
+                <p className="text-sm text-purple-400 font-semibold mb-1">
                   {work.client}
                 </p>
+                {work.product && (
+                  <p className="text-sm text-gray-400 mb-4">{work.product}</p>
+                )}
 
                 {/* Testimonial */}
-                <p className="text-sm text-gray-300 leading-relaxed mb-6 flex-grow">
+                <p className="text-sm text-gray-300 leading-relaxed mb-6 grow">
                   "{work.testimonial}"
                 </p>
 
@@ -143,10 +277,21 @@ export default function PreviousWorks() {
                     {work.rating}/5
                   </span>
                 </div>
+                {/* Watch Case Study CTA removed per request */}
               </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* View more button */}
+      <div className="relative z-10 text-center mt-8">
+        <Link
+          href="/previous-works"
+          className="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+        >
+          View more
+        </Link>
       </div>
 
       {/* Bottom CTA */}
