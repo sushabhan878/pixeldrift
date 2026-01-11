@@ -41,10 +41,10 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { label: "About Us", href: "#about" },
-    { label: "Our Services", href: "#services" },
-    { label: "Previous Works", href: "#works" },
-    { label: "Contact Us", href: "#contact" },
+    { label: "About Us", href: "/#about" },
+    { label: "Our Services", href: "/#services" },
+    { label: "Previous Works", href: "/previous-works" },
+    { label: "Contact Us", href: "/#contact" },
   ];
 
   return (
@@ -67,6 +67,30 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   className="text-white font-medium hover:text-gray-200 transition-colors duration-200"
+                  onClick={(e) => {
+                    // Smooth-scroll for in-page anchors when already on root
+                    // support both '#id' and '/#id' href formats
+                    const isHashOnly = item.href.startsWith("#");
+                    const isRootHash = item.href.startsWith("/#");
+                    if (isHashOnly || isRootHash) {
+                      const id = isHashOnly
+                        ? item.href.slice(1)
+                        : item.href.slice(2);
+                      // If we're on the root page, prevent navigation and smooth-scroll
+                      if (window.location.pathname === "/") {
+                        const el = document.getElementById(id);
+                        if (el) {
+                          e.preventDefault();
+                          el.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                          history.replaceState(null, "", `#${id}`);
+                        }
+                      }
+                      // otherwise allow the link to navigate to '/' (or '/#id') so the target page loads
+                    }
+                  }}
                 >
                   {item.label}
                 </Link>
